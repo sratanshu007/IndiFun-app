@@ -12,20 +12,22 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.deificdigital.liveapp",
+      "bundleIdentifier": "com.indifun.liveapp",
       "infoPlist": {
         "NSCameraUsageDescription": "Indi Fun needs camera access for live streaming and host verification.",
         "NSMicrophoneUsageDescription": "Indi Fun needs microphone access for live audio and party rooms."
       }
     },
     "android": {
-      "package": "com.deificdigital.liveapp",
+      "package": "com.indifun.liveapp",
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
         "MODIFY_AUDIO_SETTINGS",
         "INTERNET",
-        "ACCESS_NETWORK_STATE"
+        "ACCESS_NETWORK_STATE",
+        "ACCESS_WIFI_STATE",
+        "WAKE_LOCK"
       ]
     }
   }

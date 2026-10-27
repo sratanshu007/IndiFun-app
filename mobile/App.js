@@ -7,17 +7,24 @@ import {
   BackHandler,
   Platform,
   PermissionsAndroid,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import Constants from 'expo-constants';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+
+const DEFAULT_SERVER_URL = 'https://indifun-app.onrender.com';
+const CHROME_USER_AGENT =
+  'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36';
 
 export default function App() {
   const webViewRef = useRef(null);
   const canGoBackRef = useRef(false);
   const [loadError, setLoadError] = useState(null);
-  const [useLocalWifi, setUseLocalWifi] = useState(false);
+  const [serverUrl, setServerUrl] = useState(DEFAULT_SERVER_URL);
+  const [editUrlModal, setEditUrlModal] = useState(false);
+  const [tempUrl, setTempUrl] = useState(DEFAULT_SERVER_URL);
 
   // Request Android runtime permissions for camera & mic on startup
   useEffect(() => {
@@ -35,15 +42,6 @@ export default function App() {
     }
     requestHardwarePermissions();
   }, []);
-
-  const CLOUDFLARE_HTTPS_URL = 'https://elevation-shops-superb-arm.trycloudflare.com';
-  const LOCAL_LAN_URL = 'http://192.168.1.46:4000';
-
-  const serverUrl = useMemo(() => {
-    if (useLocalWifi) return LOCAL_LAN_URL;
-    if (CLOUDFLARE_HTTPS_URL) return CLOUDFLARE_HTTPS_URL;
-    return LOCAL_LAN_URL;
-  }, [useLocalWifi, CLOUDFLARE_HTTPS_URL]);
 
   // Android hardware back button handling
   useEffect(() => {
@@ -64,15 +62,20 @@ export default function App() {
     webViewRef.current?.reload();
   };
 
-  const toggleConnectionMode = () => {
+  const handleSaveUrl = () => {
+    let clean = tempUrl.trim();
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = 'https://' + clean;
+    }
+    setServerUrl(clean);
+    setEditUrlModal(false);
     setLoadError(null);
-    setUseLocalWifi((prev) => !prev);
   };
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container} edges={['top']}>
-        <ExpoStatusBar style="dark" backgroundColor="#ffffff" />
+        <ExpoStatusBar style="light" backgroundColor="#0f111a" />
 
         <View style={styles.webWrap}>
           <WebView
@@ -80,10 +83,10 @@ export default function App() {
             key={serverUrl}
             source={{ uri: serverUrl }}
             style={styles.webview}
+            userAgent={CHROME_USER_AGENT}
             javaScriptEnabled={true}
             domStorageEnabled={true}
-            cacheEnabled={false}
-            incognito={true}
+            cacheEnabled={true}
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
             mediaCapturePermissionGrantType="grant"
@@ -118,26 +121,60 @@ export default function App() {
 
           {loadError && (
             <View style={styles.errorContainer}>
-              <Text style={styles.errorEmoji}>⚠️</Text>
-              <Text style={styles.errorTitle}>Cannot Connect to Server</Text>
-              <Text style={styles.errorSubtitle}>
-                {loadError}
-              </Text>
-              <Text style={styles.urlLabel}>Current URL: {serverUrl}</Text>
+              <Text style={styles.errorEmoji}>📡</Text>
+              <Text style={styles.errorTitle}>Connecting to Indi Fun Live</Text>
+              <Text style={styles.errorSubtitle}>{loadError}</Text>
+              <Text style={styles.urlLabel}>{serverUrl}</Text>
 
               <TouchableOpacity style={styles.retryBtn} onPress={handleRetry}>
                 <Text style={styles.retryBtnText}>Retry Connection</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.switchBtn} onPress={toggleConnectionMode}>
-                <Text style={styles.switchBtnText}>
-                  {useLocalWifi
-                    ? 'Switch to Cloudflare Tunnel'
-                    : 'Switch to Local Wi-Fi (192.168.1.46)'}
-                </Text>
+              <TouchableOpacity
+                style={styles.switchBtn}
+                onPress={() => {
+                  setTempUrl(serverUrl);
+                  setEditUrlModal(true);
+                }}
+              >
+                <Text style={styles.switchBtnText}>Change Server URL</Text>
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Modal to change URL if ever needed */}
+          <Modal visible={editUrlModal} transparent={true} animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalBox}>
+                <Text style={styles.modalTitle}>Configure Server URL</Text>
+                <Text style={styles.modalHint}>Enter backend server URL:</Text>
+                <TextInput
+                  style={styles.input}
+                  value={tempUrl}
+                  onChangeText={setTempUrl}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  placeholder="https://indifun-app.onrender.com"
+                  placeholderTextColor="#8892a6"
+                />
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity
+                    style={[styles.modalBtn, styles.cancelBtn]}
+                    onPress={() => setEditUrlModal(false)}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.modalBtn, styles.saveBtn]}
+                    onPress={handleSaveUrl}
+                  >
+                    <Text style={styles.saveBtnText}>Save & Connect</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -147,15 +184,15 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f111a',
   },
   webWrap: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f111a',
   },
   webview: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f111a',
   },
   errorContainer: {
     position: 'absolute',
@@ -163,42 +200,43 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#0f111a',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
     zIndex: 9999,
   },
   errorEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
+    fontSize: 52,
+    marginBottom: 14,
   },
   errorTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111728',
+    color: '#ffffff',
     marginBottom: 8,
   },
   errorSubtitle: {
     fontSize: 14,
-    color: '#ff2a6d',
+    color: '#ff4d88',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   urlLabel: {
     fontSize: 12,
-    color: '#8892a6',
+    color: '#8b949e',
     textAlign: 'center',
     marginBottom: 24,
-    backgroundColor: '#f6f7fb',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#1b1f2e',
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 8,
+    maxWidth: '90%',
   },
   retryBtn: {
     backgroundColor: '#ff2a6d',
     paddingHorizontal: 28,
-    paddingVertical: 13,
+    paddingVertical: 14,
     borderRadius: 24,
     width: '100%',
     alignItems: 'center',
@@ -210,16 +248,76 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   switchBtn: {
-    backgroundColor: '#f0f3fa',
+    backgroundColor: '#1e2438',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 13,
     borderRadius: 24,
     width: '100%',
     alignItems: 'center',
   },
   switchBtnText: {
-    color: '#111728',
+    color: '#e2e8f0',
     fontWeight: '600',
     fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalBox: {
+    backgroundColor: '#1b1f2e',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  modalHint: {
+    fontSize: 13,
+    color: '#8b949e',
+    marginBottom: 12,
+  },
+  input: {
+    backgroundColor: '#0f111a',
+    borderColor: '#30363d',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#ffffff',
+    fontSize: 14,
+    marginBottom: 20,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  modalBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+  },
+  cancelBtn: {
+    backgroundColor: '#2d3348',
+  },
+  cancelBtnText: {
+    color: '#cbd5e1',
+    fontWeight: '600',
+  },
+  saveBtn: {
+    backgroundColor: '#ff2a6d',
+  },
+  saveBtnText: {
+    color: '#ffffff',
+    fontWeight: '700',
   },
 });
