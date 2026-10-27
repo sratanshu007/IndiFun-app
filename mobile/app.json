@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Indi Fun",
+    "slug": "indifun",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.deificdigital.liveapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Indi Fun needs camera access for live streaming and host verification.",
+        "NSMicrophoneUsageDescription": "Indi Fun needs microphone access for live audio and party rooms."
+      }
+    },
+    "android": {
+      "package": "com.deificdigital.liveapp",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    }
+  }
+}

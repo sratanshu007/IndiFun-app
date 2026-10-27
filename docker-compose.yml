@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: liveapp
+      POSTGRES_PASSWORD: change-me
+      POSTGRES_DB: liveapp
+    volumes: [pgdata:/var/lib/postgresql/data]
+    restart: unless-stopped
+  app:
+    build: .
+    depends_on: [db]
+    ports: ["4000:4000"]
+    env_file: server/.env
+    environment:
+      DATABASE_URL: postgres://liveapp:change-me@db:5432/liveapp
+    volumes: [uploads:/data]
+    restart: unless-stopped
+volumes:
+  pgdata:
+  uploads:

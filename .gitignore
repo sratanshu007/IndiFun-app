@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+server/.env
+
+# Local SQLite databases and temp files
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+server/data/*.sqlite
+server/data/*.sqlite-shm
+server/data/*.sqlite-wal
+
+# Uploads and private user files (keep folders via .gitkeep)
+server/uploads/*
+!server/uploads/.gitkeep
+server/private/*
+!server/private/.gitkeep
+
+# Expo and mobile build caches
+.expo/
+mobile/.expo/
+mobile/.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+animations/__pycache__/
+
+# OS and Editor files
+.DS_Store
+*/.DS_Store
+**/.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

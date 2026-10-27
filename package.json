@@ -1,0 +1,22 @@
+{
+  "name": "liveapp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Live streaming app (video live, party rooms, gifts, PK, VIP, agencies) with admin and agency panels",
+  "scripts": {
+    "setup": "npm --prefix server install && npm --prefix app install && npm --prefix admin install",
+    "setup:mobile": "npm --prefix mobile install",
+    "build": "npm --prefix app run build && npm --prefix admin run build",
+    "seed": "npm --prefix server run seed",
+    "start": "npm --prefix server start",
+    "dev:server": "npm --prefix server run dev",
+    "dev:app": "npm --prefix app run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "dev:expo": "npm --prefix mobile run start",
+    "expo": "npm --prefix mobile run start",
+    "expo:android": "npm --prefix mobile run android",
+    "expo:ios": "npm --prefix mobile run ios",
+    "anims": "python3 animations/make_anims.py"
+  },
+  "engines": { "node": ">=22.13" }
+}
